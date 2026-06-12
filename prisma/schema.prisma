@@ -17,19 +17,34 @@ model Category {
 }
 
 model Word {
-  id         Int      @id @default(autoincrement())
+  id         Int                @id @default(autoincrement())
   spanish    String
   japanese   String
-  difficulty Int      @default(1) // 1=易, 2=中, 3=難
+  difficulty Int                @default(1) // 1=易, 2=中, 3=難
   categoryId Int
-  category   Category @relation(fields: [categoryId], references: [id])
-  createdAt  DateTime @default(now())
+  category   Category           @relation(fields: [categoryId], references: [id])
+  createdAt  DateTime           @default(now())
+  progress   UserWordProgress[]
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
+  id        Int                @id @default(autoincrement())
+  email     String             @unique
   password  String
   name      String?
-  createdAt DateTime @default(now())
+  createdAt DateTime           @default(now())
+  progress  UserWordProgress[]
+}
+
+model UserWordProgress {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  wordId    Int
+  known     Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  word Word @relation(fields: [wordId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, wordId])
 }
