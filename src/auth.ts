@@ -1,8 +1,10 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
 import type { NextRequest } from "next/server";
 import type { Session } from "next-auth";
 import type { User } from "next-auth";
+import { findUserByEmail } from "@/lib/db/users";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -12,12 +14,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      // NOTE: User model is not yet defined (Issue #2).
-      // This authorize function will be fully implemented in Issue #3.
       async authorize(credentials): Promise<User | null> {
-        // Placeholder: always returns null until User model and auth logic are implemented
-        void credentials;
-        return null;
+        if (
+          typeof credentials?.email !== "string" ||
+          typeof credentials?.password !== "string"
+        ) {
+          return null;
+        }
+
+        const user = await findUserByEmail(credentials.email);
+        if (!user) {
+          return null;
+        }
+
+        const isPasswordValid = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
+        if (!isPasswordValid) {
+          return null;
+        }
+
+        return {
+          id: String(user.id),
+          email: user.email,
+          name: user.name ?? undefined,
+        };
       },
     }),
   ],
