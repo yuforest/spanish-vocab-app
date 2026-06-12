@@ -9,3 +9,19 @@ generator client {
 datasource db {
   provider = "sqlite"
 }
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  words Word[]
+}
+
+model Word {
+  id         Int      @id @default(autoincrement())
+  spanish    String
+  japanese   String
+  difficulty Int      @default(1) // 1=易, 2=中, 3=難
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+  createdAt  DateTime @default(now())
+}
