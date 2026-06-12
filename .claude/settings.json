@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$(git rev-parse --show-toplevel)\" && pnpm lint --quiet 2>&1 || echo '{\"decision\": \"block\", \"reason\": \"lintエラーが残っています。修正してください\"}'"
+          }
+        ]
+      }
+    ]
+  }
+}
